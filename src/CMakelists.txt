@@ -1,0 +1,27 @@
+set(SRCS main.cpp lattice.cpp )
+
+add_executable(WindTunnelRun ${SRCS})
+
+target_include_directories(WindTunnelRun PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../include")
+
+target_link_libraries(WindTunnelRun PRIVATE ${VTK_LIBRARIES})
+
+vtk_module_autoinit(
+  TARGETS WindTunnelRun
+  MODULES ${VTK_LIBRARIES}
+)
+
+if(MSVC)
+    string(REPLACE "/openmp" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    
+    target_compile_options(WindTunnelRun PRIVATE 
+        /O2 /Oi /Ot /GT /GL 
+        /arch:AVX2 
+        /openmp:llvm 
+        /utf-8
+    )
+    
+    target_link_libraries(WindTunnelRun PRIVATE libomp.lib)
+else()
+    target_compile_options(WindTunnelRun PRIVATE -O3 -march=native -ffast-math)
+endif()
